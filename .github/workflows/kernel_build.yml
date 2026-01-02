@@ -115,6 +115,12 @@ jobs:
         run: |
           sed -i "s|CHATID=[^/ ]*|CHATID=${{ secrets.TELEGRAM_CHAT_ID }}|" kramel.sh
 
+      - name: Download Original Boot Image from Release
+        run: |
+          mkdir -p .github/workflows
+          wget -O .github/workflows/boot.img https://github.com/gjcjhhjfjchjcjmfn/Nethunter_kernel_samsung_exynos7870/releases/download/V0.0/boot.img
+          echo "Boot image downloaded and placed in .github/workflows/boot.img"
+      
       - name: Build kernel
         run: |
           eval "${{ github.event.inputs.run_command }}"
