@@ -16,26 +16,29 @@ on:
         default: 'sudo apt-get update -y && sudo apt-get install dialog bash sed wget git curl zip tar jq expect make cmake automake autoconf llvm lld lldb clang gcc binutils apt-utils bison perl gperf gawk flex bc python3 zstd openssl unzip cpio bc bison build-essential ccache liblz4-tool libsdl1.2-dev libstdc++6 libxml2 libxml2-utils lzop pngcrush schedtool squashfs-tools xsltproc zlib1g-dev libncurses5-dev bzip2 git gcc g++ libssl-dev gcc-aarch64-linux-gnu gcc-arm-linux-gnueabihf gcc-arm-linux-gnueabi g++-aarch64-linux-gnu g++-arm-linux-gnueabi g++-arm-linux-gnueabihf dwarves libelf-dev dos2unix kmod -y;sudo apt-get autoremove -y'
         required: false
       builder_name:
-        description: 'Builder name to set in BUILDER variable and CONFIG_LOCALVERSION'
+        description: 'Builder name'
+        default: 'MR.English2008'
         required: false
       defconfig_name:
-        description: 'Defconfig name to use (sets CONFIG variable in kramel.sh)'
+        description: 'Defconfig name'
+        default: 'nethunter_defconfig'
         required: false
       repack_boot_img:
         description: 'Whether to repack boot.img with new kernel'
         type: boolean
-        default: false
+        default: true
       built_kernel_path:
-        description: 'Path of built kernel to use in boot.img repacking (default: out/arch/arm64/boot/Image)'
+        description: 'Path of built kernel'
         default: 'out/arch/arm64/boot/Image'
         required: false
       create_release:
         description: 'Create a GitHub release'
         type: boolean
-        default: false
+        default: true
       release_description:
-        description: 'Release description (can include name=ReleaseName tag=v1.0 des=commit in the text)'
-        required: false 
+        description: 'Release description'
+        default: 'name=Nethunter-Kernel tag=v1.0 des=Build_by_MR.English2008'
+        required: false
 env:
   HAS_TELEGRAM_BOT: ${{ secrets.TELEGRAM_BOT_TOKEN != '' }}
   HAS_TELEGRAM_CHAT: ${{ secrets.TELEGRAM_CHAT_ID != '' }}
@@ -138,11 +141,13 @@ jobs:
             git clone --depth=1 https://github.com/MrRob0-X/AIK
             chmod 0777 -R AIK
             cd AIK
-            ./unpackimg ../$BOOT_IMG
-            cp -rf ../$KERNEL_IMAGE split/kernel
-            cp -rf ../$DTB_IMG split/dtb
-            ./repackimg
-            mv new-boot.img ../boot.img
+            # أضفنا sudo هنا لفك الملفات المحمية
+            sudo ./unpackimg.sh ../$BOOT_IMG
+            sudo cp -rf ../$KERNEL_IMAGE split/kernel
+            sudo cp -rf ../$DTB_IMG split/dtb
+            # أضفنا sudo هنا لإعادة الضغط
+            sudo ./repackimg.sh
+            sudo mv new-boot.img ../boot.img
             cd ..
             echo "Boot.img repacked successfully"
           else
