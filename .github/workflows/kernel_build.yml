@@ -128,40 +128,31 @@ jobs:
         run: |
           eval "${{ github.event.inputs.run_command }}"
 
-      - name: Repack boot.img with new kernel
+      - name: Repack boot.img (Safe Mode)
         if: ${{ github.event.inputs.repack_boot_img == 'true' }}
         run: |
           BOOT_IMG=".github/workflows/boot.img"
-          KERNEL_IMAGE="${{ github.event.inputs.built_kernel_path }}"
-          DTB_IMG="out/arch/arm64/boot/dtb.img"
-          
-          echo "Repacking boot.img: $BOOT_IMG with kernel: $KERNEL_IMAGE"
+          KERNEL_IMAGE="out/arch/arm64/boot/Image"
           
           if [ -f "$BOOT_IMG" ]; then
             git clone --depth=1 https://github.com/MrRob0-X/AIK
-            # إعطاء صلاحية التنفيذ للمجلد بالكامل
             chmod -R 777 AIK
             cd AIK
             
-            # استخدام sudo والأسماء الصحيحة بدون .sh
+            # فك الملف الأصلي
             sudo ./unpackimg ../$BOOT_IMG
             
-            # استبدال الكيرنل والـ DTB
+            # استبدال الكيرنل فقط (بدون لمس الـ DTB أو الـ Ramdisk)
             sudo cp -rf ../$KERNEL_IMAGE split/kernel
-            sudo cp -rf ../$DTB_IMG split/dtb
             
-            # إعادة الضغط بالاسم الصحيح
+            # إعادة الضغط مع الحفاظ على الهيدر الأصلي تماماً
             sudo ./repackimg
             
-            # نقل الملف الناتج للخرج الرئيسي
             sudo mv new-boot.img ../boot.img
             cd ..
-            echo "Boot.img repacked successfully by MR.English2008"
-          else
-            echo "Error: Boot image file $BOOT_IMG not found"
-            exit 1
+            echo "Safe Repack Completed"
           fi
-
+          
       - name: Send boot.img to Telegram
         if: ${{ github.event.inputs.repack_boot_img == 'true' && github.event.inputs.use_telegram == 'true' }}
         run: |
