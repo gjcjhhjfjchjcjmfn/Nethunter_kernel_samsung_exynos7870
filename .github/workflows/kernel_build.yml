@@ -139,17 +139,24 @@ jobs:
           
           if [ -f "$BOOT_IMG" ]; then
             git clone --depth=1 https://github.com/MrRob0-X/AIK
-            chmod 0777 -R AIK
+            # إعطاء صلاحية التنفيذ للمجلد بالكامل
+            chmod -R 777 AIK
             cd AIK
-            # أضفنا sudo هنا لفك الملفات المحمية
-            sudo ./unpackimg.sh ../$BOOT_IMG
+            
+            # استخدام sudo والأسماء الصحيحة بدون .sh
+            sudo ./unpackimg ../$BOOT_IMG
+            
+            # استبدال الكيرنل والـ DTB
             sudo cp -rf ../$KERNEL_IMAGE split/kernel
             sudo cp -rf ../$DTB_IMG split/dtb
-            # أضفنا sudo هنا لإعادة الضغط
-            sudo ./repackimg.sh
+            
+            # إعادة الضغط بالاسم الصحيح
+            sudo ./repackimg
+            
+            # نقل الملف الناتج للخرج الرئيسي
             sudo mv new-boot.img ../boot.img
             cd ..
-            echo "Boot.img repacked successfully"
+            echo "Boot.img repacked successfully by MR.English2008"
           else
             echo "Error: Boot image file $BOOT_IMG not found"
             exit 1
